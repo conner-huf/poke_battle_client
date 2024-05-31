@@ -12,6 +12,20 @@ function App() {
 
   const ACTIVE_URL = DEV_URL
 
+  function debounce(func, delay) {
+    let debounceTimer;
+    return function() {
+      const context = this;
+      const args = arguments;
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => func.apply(context, args), delay);
+    }
+  }
+
+  const handlePageChange = (event) => {
+    setPage(Number(event.target.value));
+  }
+
   useEffect(() => {
     setIsLoading(true)
     fetch(`${ACTIVE_URL}/pokemon?page=${page}`)
@@ -49,13 +63,14 @@ function App() {
           <button className='search-button'>Search</button>
         </div>
         <div className='header-right'>
-          <button onClick={handlePageDown} className='page-down'>{'<'}</button>
-          <button onClick={handlePageUp} className='page-up'>{'>'}</button>
+          <button onClick={debounce(handlePageDown, 500)} className='page-down'>{'<'}</button>
+          <input className='page-number' value={page} onChange={handlePageChange}></input>
+          <button onClick={debounce(handlePageUp, 500)} className='page-up'>{'>'}</button>
         </div>
       </div>
       <div className='pokemon-cards'>
         {isLoading && <h1>Loading...</h1>}
-        {pokemonList && pokemonList.map((pokemon, index) => (
+        {!isLoading && pokemonList && pokemonList.map((pokemon, index) => (
           <PokemonCard key={index} pokemon={pokemon} />
         ))}
       </div>
